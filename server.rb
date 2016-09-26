@@ -1,5 +1,5 @@
 require 'sinatra'
-require 'sinatra/reloader' #remove before deployment
+#require 'sinatra/reloader' #remove before deployment
 use Rack::Session::Cookie
 
 get '/' do
