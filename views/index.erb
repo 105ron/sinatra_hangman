@@ -3,22 +3,16 @@
   <title>The Caesar Cipher Web App</title>    
 	</head>
   <body>
-    
-    <p>
-    		<%= session[:display_string] %>
-    </p>
-    <p>
-        <%= session[:secret_word] %>
-    </p>
-    <p>
-        <%= session[:attempts] %>
-    </p>
-    <p>
-        <%= session[:session_guess] %>
-    </p>
+    <h1>Hangman</h1>
+    <h3>Welcome</h3>
+    <p>Can you guess the secret word? </p>
+    <p><%= session[:display_string] %> </p>
+    <p>Your incorrect guesses so far have been <%= session[:string_of_guesses] %>
+    <p>You have <%= session[:attempts] %> remaining guesses.</p>
     <form action='/try' method='post'>
-    <input type='text' name='guess' pattern='[A-Za-z]{1}' title='Enter one letter.' autofocus required />
+    <input type='text' name='guess' title='Enter word or letter' autofocus required />
     <input type='submit' value='Go' />
+    <p>Put a letter or word in the box above and click go!</p>
   </form>
   </body>
 </html>

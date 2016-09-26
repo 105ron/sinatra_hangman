@@ -27,11 +27,11 @@ post '/try' do
 end
 
 get '/lose' do
-
+  erb :lose
 end
 
 get '/win' do
-
+  erb :win
 end
 
 helpers do
@@ -51,13 +51,9 @@ helpers do
 
   def play
     if guess.length == 1
-      valid = true
       match_character
-    elsif guess.length >= 5
-      valid = true
-      match_word
     else
-      return #No input, don't run the game.
+      match_word
     end
     deduct_guesses
   end
@@ -66,7 +62,7 @@ helpers do
   def deduct_guesses
   	session[:attempts] -= 1
   	@attemtps = session[:attempts]
-  	redirect to('/lose') if @attempts == 0
+  	redirect to('/lose') if @attempts <= 1
   end
 
 
