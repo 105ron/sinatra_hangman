@@ -2,31 +2,36 @@ module Hangman
 
 
   class Game
-		attr_accessor :attempts,:secret_word,:guess,:string_of_guesses, :display_string, :secret_word_array, :won
+		attr_accessor :attempts,:secret_word,:guess,:string_of_guesses, :display_string, :secret_word_array, :won, :game_over
 
 
 		def initialize
+		  @guess = '' #initialize to '' nil class doesn't have .length
 		  @string_of_guesses = ''
-	  	  @attempts = 0
-	  	  @secret_word = secret_word
-	  	  @secret_word_array = @secret_word.split("")
-	  	  @display_string = ("_  ") * (@secret_word.length)
-	  	  @won = false
+	  	@attempts = 10
+	  	@secret_word = secret_word
+	  	@secret_word_array = @secret_word.split("")
+	  	@display_string = ("_  ") * (@secret_word.length)
+	  	@game_over = false
+	  	@won = false
 		end
 
 
 		def play
-		  puts @display_string
-		  while @attempts < 10
-		    if get_user_input == "check_character"
-		      match_character
-		    else
-		  	  match_word
-		    end
-		    display_game_status unless @won
-		    @attempts += 1
-		    end
-		  you_lose if !@won
+	    if guess.length == 1
+			  	valid = true
+			  	match_character
+			  elsif guess.length >= 5
+			  	valid = true
+	    		match_word
+	    	else
+	    		return #No input, don't run the game.
+	    	end
+	    @attempts -= 1
+		  if (!@won && attempts == 0)
+		  	@game_over = true
+		  	you_lose
+		  end
 		end
 
 
@@ -45,38 +50,10 @@ module Hangman
 	  	return word
 	  end
 
-		def display_game_status
-	  	  puts @display_string 
-	  	  guess_so_far unless string_of_guesses == ''
-	  	  puts "You've got #{9 - @attempts} guesses left"
-		end
 
-
-		def get_user_input
-		  valid = false
-		  puts "Please character would like to guess, or type save to save and quit:"
-		  until valid
-			  @guess = gets.downcase.chomp
-			  if guess.length == 1
-			  	valid = true
-			  	return_selection = "check_character"
-			  elsif guess.length >= 5
-			  	valid = true
-			  	return_selection = "check_word"
-			  elsif guess == "save"
-			  	save
-			  else
-			  	puts "Sorry, please enter one character of the word you would like to guess"
-			  end
-		  end
-		  return_selection
-		end
-
-
-		def guess_so_far
-		  puts "You're guesses so far have been..." unless string_of_guesses == ''
-	  	  puts @string_of_guesses[0..-3]  #-2 doesn't display last comma
-	  	end
+		#def guess_so_far
+		#   @string_of_guesses[0..-3]  #-2 doesn't display last comma
+	  #end
 
 
 		def match_character
@@ -84,7 +61,6 @@ module Hangman
 		  	update_game_state
 		  else
 		  	@string_of_guesses << "#{@guess}, "
-		  	puts "Sorry, That's not in the secret word. Guess again."
 		  end
 		end
 
@@ -92,7 +68,7 @@ module Hangman
 		def update_game_state
 		  while @secret_word_array.include?(@guess)
 		  	position = @secret_word_array.find_index(@guess)
-		  	@secret_word_array[position] = nil
+		  	@secret_word_array[position] = nil # go through and find and replace with nil all characters that match the guess
 		  	@display_string[(position * 3)] = @guess
 		  	you_win if @secret_word_array.all? { |element| element == nil }
 		  end
@@ -109,17 +85,14 @@ module Hangman
 
 
 		def you_win
+			@game_over = true
 		  @won = true
 		  @attempts = 11
-		  display_winning_combination
-		  puts "Congratulations, You win!"
 		  play_again
 		end
 
 
 		def you_lose
-		  puts "Sorry you lost! We were looking for..."
-		  display_winning_combination
 		  play_again
 		end
 
@@ -127,22 +100,12 @@ module Hangman
 		def display_winning_combination
 		  @secret_word_array = @secret_word.split("")
 		  @display_string = @secret_word_array.collect {|character| character + "  "}.join
-		  puts @display_string
 		end
 
 
 		def play_again
-		  puts "would you like to play again? (y/n)"
-		  again = gets.chomp.downcase
-		  if again == "y"
-		    hangman = Game.new
-		    hangman.play
-		  else
-		  	hangman = Game.new
-		    hangman.play
-			end	     
+		  #render end of game
 		end
 	end
 
 end
-Hangman::Game.new.play
