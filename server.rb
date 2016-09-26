@@ -6,19 +6,24 @@ get '/' do
   if session['secret_word'].nil?
 		redirect to('/new')
 	end
+
+	erb :index
 end
 
 get '/new' do
-  
-  new_secret_word
-  #redirect to('/')
-  erb :index, :locals => {:secret_word => @secret_word, :display_string => @display_string, :attempts => @attempts}
+	session[:secret_word] = new_secret_word
+  session[:display_string] =@display_string = ("_  ") * (@secret_word.length)
+  session[:secret_word_array] = @secret_word_array = @secret_word.split("")
+  session[:attempts] = 10
+	session[:string_of_guesses] = ''
+	redirect to ('/')
 end
 
-post '/' do
+post '/try' do
 	session[:guess] = params[:guess].downcase
-	guess(session[:guess])
-	erb :index, :locals => {:secret_word => @secret_word, :display_string => @display_string, :attempts => @attempts}
+	update_variables
+	play
+	redirect to('/')
 end
 
 get '/lose' do
@@ -33,10 +38,16 @@ helpers do
   attr_accessor :guess,:attempts,:secret_word,:string_of_guesses,:display_string,:secret_word_array
 
 
-  def guess(input)
-    @guess = input
-    play
-  end
+  def update_variables
+	  @secret_word = session[:secret_word]
+	  @display_string = session[:display_string]
+	  @string_of_guesses = session[:string_of_guesses]
+	  @secret_word_array = session[:secret_word_array]
+		@guess = session[:guess]
+		@attempts = session[:attempts]
+	end
+
+
 
   def play
     if guess.length == 1
@@ -48,10 +59,14 @@ helpers do
     else
       return #No input, don't run the game.
     end
-    @attempts -= 1
-    if attempts == 0
-      redirect to('/lose')
-    end
+    deduct_guesses
+  end
+
+
+  def deduct_guesses
+  	session[:attempts] -= 1
+  	@attemtps = session[:attempts]
+  	redirect to('/lose') if @attempts == 0
   end
 
 
@@ -64,9 +79,7 @@ helpers do
         suitable = true
       end
     end
-    @display_string = ("_  ") * (@secret_word.length)
-    @secret_word_array = @secret_word.split("")
-    @attempts = 10
+    return @secret_word
   end
 
 
@@ -84,8 +97,8 @@ helpers do
       position = @secret_word_array.find_index(@guess)
       @secret_word_array[position] = nil # go through and find and replace with nil all characters that match the guess
       @display_string[(position * 3)] = @guess
-      you_win if @secret_word_array.all? { |element| element == nil }
     end
+    you_win if @secret_word_array.all? { |element| element == nil }
   end
 
 
